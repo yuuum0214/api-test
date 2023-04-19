@@ -102,9 +102,6 @@ const todoController = {
     list: async (req) => {
         const totalCount = await getTotal();
         const list = await getList(req);
-        
-        console.log(totalCount);
-
         if (totalCount > 0 && list.length) {
             return resData(
                 STATUS.S200.result,
@@ -128,6 +125,10 @@ const todoController = {
         if (isEmpty(id) || isEmpty(title) || isEmpty(done)) {
             return resData(STATUS.E100.result, STATUS.E100.resultDesc, currentTime());
         }
+
+        console.log(id);
+        console.log(title);
+        console.log(done);
 
         try {
             const query = `UPDATE ${TABLE.TODO} SET title =?, done=? WHERE id= ?`;
