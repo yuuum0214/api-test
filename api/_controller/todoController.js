@@ -190,6 +190,34 @@ const todoController = {
         */
     },
 
+    
+    //newcreate : DB에 새로운 정보가 입력되는데, 인덱스
+    newcreate: async (req) =>{
+        const {mb_id} = req.body;
+            //body check
+          if (isEmpty(mb_id)) {
+            return resData(STATUS.E100.result, STATUS.E100.resultDesc, currentTime());
+          }
+        
+        try {
+            //insert
+          const query = `INSERT INTO b_month (mb_id) VALUES (?)`;
+          const values = [mb_id];
+          const [rows] = await db.execute(query, values);
+
+          console.log(rows)
+          if (rows.affectedRows == 1) {
+            return resData(
+              STATUS.S200.result,
+              STATUS.S200.resultDesc,
+              currentTime()
+            );
+          }
+        } catch (e) {
+          console.log(e.message);
+          return resData(STATUS.E300.result, STATUS.E300.resultDesc, currentTime());
+        }
+    },
 }
 
 module.exports = todoController;

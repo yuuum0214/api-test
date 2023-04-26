@@ -38,4 +38,10 @@ router.post('/reset', async (req,res)=>{
     res.json(result);
 })
 
+//개인 API
+router.post('/new', async (req,res)=>{
+    const result = await todoController.newcreate(req);
+    res.json(result);
+})
+
 module.exports = router;
