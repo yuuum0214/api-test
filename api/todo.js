@@ -32,16 +32,16 @@ router.delete('/:id', async (req,res)=>{
     res.json(result);
 })
 
-// truncate, dummy insert
+// reset: truncate, dummy insert
 router.post('/reset', async (req,res)=>{
     const result = await todoController.reset(req);
     res.json(result);
 })
-
+/*
 //개인 API
 router.post('/new', async (req,res)=>{
     const result = await todoController.newcreate(req);
     res.json(result);
 })
-
+*/
 module.exports = router;

@@ -13,6 +13,7 @@ const getTotal = async () => {
       return cnt;
     } catch (e) {
       console.log(e.message);
+      //throw e;
       return resData(STATUS.E300.result, STATUS.E300.resultDesc, currentTime());
     }
 };
@@ -34,6 +35,7 @@ const getList = async (req) => {
         return rows;
     } catch (e) {
         console.log(e.message);
+//        throw e;
         return resData(STATUS.E300.result, STATUS.E300.resultDesc, currentTime());
     }
 };
@@ -48,9 +50,10 @@ const getSelectOne = async (id) => {
         return cnt;
     } catch (e) {
         console.log(e.message);
-        return resData(STATUS.E300.result, STATUS.E300.resultDesc, moment().format('LT'));
+        return resData(STATUS.E300.result, STATUS.E300.resultDesc, currentTime());
     }
 };
+
 
 const todoController = {
 
@@ -95,7 +98,7 @@ const todoController = {
           console.log(e.message);
           return resData(STATUS.E300.result, STATUS.E300.resultDesc, currentTime());
         }
-    },
+    },  
 
 
     // list
@@ -129,7 +132,6 @@ const todoController = {
         console.log(id);
         console.log(title);
         console.log(done);
-
         try {
             const query = `UPDATE ${TABLE.TODO} SET title =?, done=? WHERE id= ?`;
             const values = [title, done, id];
@@ -152,7 +154,7 @@ const todoController = {
     delete: async (req) => {
         const { id } = req.params; // url /로 들어오는것
         if (isEmpty(id)) {
-            return resData(STATUS.E100.result, STATUS.E100.resultDesc, moment().format('LT'));
+            return resData(STATUS.E100.result, STATUS.E100.resultDesc, currentTime() );
         }
         const cnt = await getSelectOne(id);
         try {
@@ -181,6 +183,7 @@ const todoController = {
     },
 
 
+
     //reset
     reset: async (req) => {
         /*
@@ -188,36 +191,43 @@ const todoController = {
             2번 : title에 내용에 번호 부여, 1씩 증가, len 만큼 insert
             3번 : 성공으로 리턴
         */
-    },
 
-    
-    //newcreate : DB에 새로운 정보가 입력되는데, 인덱스
-    newcreate: async (req) =>{
-        const {mb_id} = req.body;
-            //body check
-          if (isEmpty(mb_id)) {
-            return resData(STATUS.E100.result, STATUS.E100.resultDesc, currentTime());
-          }
+            const { title, done, len } = req.body;
+            try {
+                const truncateQuery = `TRUNCATE TABLE ${TABLE.TODO}`;
+                await db.query(truncateQuery);
+
+                let values = [];
+                for (let i = 1; i <= len; i++) {
+                    const num = i < 10 ? `0${i}` : i;
+                    const newTitle = `${title}_${num}`;
+                    values.push([newTitle, done]);
+                }
+
+                const insertQuery = `INSERT INTO ${TABLE.TODO} (title, done) VALUES ?`;
+                await db.query(insertQuery, [values]);
+
+                return resData(STATUS.S200.result, STATUS.S200.resultDesc, currentTime());
+
+            } catch (err) {
+                console.error(err);
+                return resData(STATUS.E101.result, STATUS.E101.resultDesc, currentTime());
+            }
+
+            /*
+        const len = req.body.len;
+        await db.query(`TRUNCATE TABLE ${TABLE.TODO}`);
         
-        try {
-            //insert
-          const query = `INSERT INTO b_month (mb_id) VALUES (?)`;
-          const values = [mb_id];
-          const [rows] = await db.execute(query, values);
-
-          console.log(rows)
-          if (rows.affectedRows == 1) {
-            return resData(
-              STATUS.S200.result,
-              STATUS.S200.resultDesc,
-              currentTime()
-            );
-          }
-        } catch (e) {
-          console.log(e.message);
-          return resData(STATUS.E300.result, STATUS.E300.resultDesc, currentTime());
+        for (let i = 1; i <= len; i++) {
+            const title = `text_${i}`;
+            const done = 'Y';
+            await db.query(`INSERT INTO ${TABLE.TODO} (title, done) VALUES (?, ?)`, [title, done]);
+            
         }
+        return resData( STATUS.S200.result, STATUS.S200.resultDesc, currentTime());
+*/
     },
+
 }
 
 module.exports = todoController;
